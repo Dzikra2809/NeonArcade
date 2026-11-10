@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEON CARNIVAL // Arcade Mini-Game Platform</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Orbitron:wght@600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            arcade: {
+              bg: '#070913',
+              card: '#0f172a',
+              cyan: '#22d3ee',
+              amber: '#fbbf24',
+              purple: '#c084fc'
+            }
+          },
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Orbitron', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="min-h-screen text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200 relative">
+
+  <!-- Full-Screen Particle & Confetti Canvas Overlay -->
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+  <!-- ==================== TOP NAVIGATION ==================== -->
+  <header class="sticky top-0 z-40 glass-panel-strong border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-0 sm:h-20 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 sm:gap-3">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-2.5 sm:gap-3 group focus:outline-none">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-cyan-500/20 via-purple-500/20 to-amber-500/20 border border-cyan-400/50 flex items-center justify-center glow-cyan group-hover:scale-105 transition-transform">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="9" />
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 3v6M12 15v6M3 12h6M15 12h6M5.6 5.6l4.2 4.2M14.2 14.2l4.2 4.2M18.4 5.6l-4.2 4.2M9.8 14.2l-4.2 4.2" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display font-black text-base sm:text-xl tracking-wider bg-gradient-to-r from-cyan-300 via-purple-300 to-amber-300 bg-clip-text text-transparent">
+              NEON<span class="text-cyan-400">ARCADE</span>
+            </span>
+            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+              Carnival Live
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Virtual Token &amp; Ticket Mini-Game Arena</p>
+        </div>
+      </a>
+
+      <!-- Center Quick Nav Links (Desktop) -->
+      <nav class="hidden lg:flex items-center gap-1 bg-slate-900/70 p-1.5 rounded-xl border border-slate-800/80">
+        <a href="#hero-section" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-cyan-300 hover:bg-slate-800/70 transition-colors">
+          Featured
+        </a>
+        <a href="#lucky-wheel-section" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 transition-colors flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          Lucky Wheel
+        </a>
+        <a href="#game-grid-section" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-purple-300 hover:bg-slate-800/70 transition-colors">
+          Carnival Catalog
+        </a>
+      </nav>
+
+      <!-- Right Side Controls: Balances, Sound, Notifications, Profile -->
+      <div class="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto">
+        
+        <!-- Balances Group -->
+        <div class="flex items-center gap-2">
+          <!-- Virtual Coins / Tokens Counter -->
+          <div class="flex items-center bg-slate-900/90 border border-cyan-500/35 rounded-xl px-2.5 sm:px-3.5 py-1.5 glow-cyan">
+            <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center mr-1.5 sm:mr-2 shrink-0">
+              <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-300" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.25"/>
+                <path d="M12 4a8 8 0 100 16 8 8 0 000-16zm1 11.93V17h-2v-1.07A4.002 4.002 0 018 12h2a2 2 0 104 0c0-.74-.4-1.38-1-1.72V12h-2V8.07A4.002 4.002 0 0116 12h-2a2 2 0 10-4 0c0 .74.4 1.38 1 1.72v2.21z"/>
+              </svg>
+            </div>
+            <div class="leading-tight mr-1.5 sm:mr-2">
+              <span class="block text-[9px] uppercase tracking-wider text-cyan-300/80 font-semibold">Tokens</span>
+              <span id="nav-token-balance" class="font-mono-num font-bold text-xs sm:text-sm text-white inline-block">1,000</span>
+            </div>
+            <button id="btn-refill-tokens" title="Claim Free Arcade Token Refill (+250)" class="px-1.5 py-0.5 rounded-md bg-cyan-500/20 hover:bg-cyan-400/30 border border-cyan-400/40 text-cyan-300 text-[10px] font-bold transition-all active:scale-95">
+              +FREE
+            </button>
+          </div>
+
+          <!-- Prize Tickets Counter -->
+          <div class="flex items-center bg-slate-900/90 border border-amber-500/35 rounded-xl px-2.5 sm:px-3.5 py-1.5 glow-amber">
+            <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center mr-1.5 sm:mr-2 shrink-0">
+              <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+                <path d="M13 5v2M13 17v2M13 11v2"/>
+              </svg>
+            </div>
+            <div class="leading-tight">
+              <span class="block text-[9px] uppercase tracking-wider text-amber-300/80 font-semibold">Tickets</span>
+              <span id="nav-ticket-balance" class="font-mono-num font-bold text-xs sm:text-sm text-amber-300 inline-block">2,450</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utility & Profile Group -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5">
+          <!-- Sound Toggle Button -->
+          <button id="btn-sound-toggle" aria-label="Toggle Arcade Sound Effects" title="Arcade Synth Sound: ON" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-cyan-400/60 flex items-center justify-center text-cyan-300 transition-all active:scale-95">
+            <!-- Sound ON Icon -->
+            <svg id="icon-sound-on" class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <!-- Sound OFF Icon -->
+            <svg id="icon-sound-off" class="w-4 h-4 sm:w-5 sm:h-5 hidden text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+
+          <!-- Notifications Button & Dropdown -->
+          <div class="relative">
+            <button id="btn-notifications" aria-label="Notifications" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-purple-400/60 flex items-center justify-center text-slate-200 hover:text-purple-300 transition-all active:scale-95">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              <span id="notif-badge" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-[10px] font-bold flex items-center justify-center text-white shadow-lg">
+                3
+              </span>
+            </button>
+
+            <!-- Notification Dropdown Panel -->
+            <div id="notif-dropdown" class="hidden absolute right-0 mt-3 w-72 sm:w-96 rounded-2xl glass-panel-strong border border-purple-500/30 shadow-2xl p-4 z-50">
+              <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                  <h3 class="font-display text-xs uppercase tracking-wider font-bold text-white">Carnival Feed</h3>
+                </div>
+                <button id="btn-clear-notifs" class="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium">
+                  Mark all read
+                </button>
+              </div>
+              <div id="notif-list" class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- User Profile Pill -->
+          <div class="flex items-center gap-2.5 pl-1 sm:pl-2 border-l border-slate-800">
+            <div class="relative">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-cyan-500 to-amber-400 p-0.5">
+                <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-display font-bold text-xs text-cyan-300">
+                  PV
+                </div>
+              </div>
+              <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-950" title="Online"></span>
+            </div>
+            <div class="hidden md:block leading-tight">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-white">PixelVoyager</span>
+                <span class="px-1.5 py-0.5 rounded bg-purple-500/20 border border-purple-400/40 text-[9px] font-bold text-purple-300">LVL 7</span>
+              </div>
+              <span class="text-[11px] text-slate-400">VIP Carnival Pass</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-14">
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section id="hero-section" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      
+      <!-- Hero Text & Live Stats (7 cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold">
+          <span class="px-2 py-0.5 rounded-full bg-purple-500 text-slate-950 font-black text-[10px] uppercase">Season 04</span>
+          <span>Cyber Midway Festival • Double Ticket Multiplier Active</span>
+        </div>
+
+        <h1 class="font-display font-black text-3xl sm:text-5xl lg:text-[52px] leading-[1.1] tracking-tight">
+          STEP INTO THE <br />
+          <span class="bg-gradient-to-r from-cyan-300 via-purple-400 to-amber-300 bg-clip-text text-transparent text-glow-cyan">
+            NEON CARNIVAL
+          </span>
+          ARENA
+        </h1>
+
+        <p class="text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed font-normal">
+          Experience high-voltage arcade classics reimagined for the cyber midway. Spend virtual tokens, spin the <span class="text-cyan-300 font-semibold">Hyper Lucky Wheel</span>, and stack massive prize ticket multipliers!
+        </p>
+
+        <!-- Hero Action Buttons -->
+        <div class="flex flex-wrap items-center gap-4 pt-1">
+          <a href="#lucky-wheel-section" class="btn-shimmer inline-flex items-center gap-3 px-7 py-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-cyan-500 to-purple-600 text-slate-950 font-display font-black text-sm uppercase tracking-wider shadow-lg shadow-cyan-500/25 hover:scale-[1.02] active:scale-95 transition-transform">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/>
+            </svg>
+            Spin Lucky Wheel
+          </a>
+
+          <a href="#game-grid-section" class="inline-flex items-center gap-2.5 px-6 py-4 rounded-2xl glass-panel hover:bg-slate-800/80 border border-slate-700/80 hover:border-amber-400/50 text-slate-200 hover:text-amber-300 font-display font-bold text-xs uppercase tracking-wider transition-all">
+            <span>Explore 42 Mini-Games</span>
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Live Carnival Metrics Strip -->
+        <div class="grid grid-cols-3 gap-3 sm:gap-4 pt-3 max-w-xl">
+          <div class="glass-panel rounded-2xl p-3.5 border border-cyan-500/20">
+            <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Community Jackpot</span>
+            <span id="hero-jackpot-ticker" class="font-mono-num font-extrabold text-base sm:text-xl text-amber-300 text-glow-amber">1,250,840</span>
+            <span class="text-[10px] text-amber-400/80 block">Prize Tickets Pool</span>
+          </div>
+          <div class="glass-panel rounded-2xl p-3.5 border border-purple-500/20">
+            <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Top Multiplier</span>
+            <span class="font-mono-num font-extrabold text-base sm:text-xl text-purple-300 text-glow-purple">1000x</span>
+            <span class="text-[10px] text-purple-400/80 block">Mega Crown Tier</span>
+          </div>
+          <div class="glass-panel rounded-2xl p-3.5 border border-cyan-500/20">
+            <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Players Online</span>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="hero-online-count" class="font-mono-num font-extrabold text-base sm:text-xl text-cyan-300">1,428</span>
+            </div>
+            <span class="text-[10px] text-cyan-400/80 block">In Arcade Lobby</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Interactive Featured Mini-Game Card (5 cols) -->
+      <div class="lg:col-span-5">
+        <div id="hero-featured-card" class="hero-card glass-panel-strong rounded-3xl p-6 sm:p-7 cursor-pointer group select-none overflow-hidden">
+          <!-- Ambient decorative glow blobs -->
+          <div class="absolute -top-16 -right-16 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-cyan-400/35 transition-all"></div>
+          <div class="absolute -bottom-16 -left-16 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-400/30 transition-all"></div>
+
+          <!-- Top Badges -->
+          <div class="flex items-center justify-between gap-2 mb-5">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[11px] font-bold uppercase tracking-wider glow-amber">
+              <svg class="w-3.5 h-3.5 text-amber-300 animate-spin" style="animation-duration: 6s;" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>
+              </svg>
+              Featured Game
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 text-[11px] font-mono-num font-bold">
+              JACKPOT 50x–1000x
+            </span>
+          </div>
+
+          <!-- Interactive Center Graphic -->
+          <div class="relative my-4 py-6 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-800/90 flex flex-col items-center justify-center overflow-hidden">
+            <!-- Animated Mini Wheel Preview SVG -->
+            <div class="relative w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center animate-float">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/30 via-purple-500/30 to-amber-500/30 blur-xl animate-pulse-ring"></div>
+              <svg class="w-full h-full group-hover:rotate-45 transition-transform duration-700 ease-out" viewBox="0 0 120 120">
+                <defs>
+                  <linearGradient id="heroGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#22d3ee" />
+                    <stop offset="50%" stop-color="#c084fc" />
+                    <stop offset="100%" stop-color="#fbbf24" />
+                  </linearGradient>
+                </defs>
+                <circle cx="60" cy="60" r="54" fill="#090d1a" stroke="url(#heroGrad1)" stroke-width="4"/>
+                <!-- Wheel Spokes -->
+                <g stroke="rgba(255,255,255,0.22)" stroke-width="1.5">
+                  <line x1="60" y1="6" x2="60" y2="114" />
+                  <line x1="6" y1="60" x2="114" y2="60" />
+                  <line x1="22" y1="22" x2="98" y2="98" />
+                  <line x1="98" y1="22" x2="22" y2="98" />
+                </g>
+                <!-- Colored Arcs -->
+                <path d="M60 60 L60 10 A50 50 0 0 1 95.3 24.7 Z" fill="#22d3ee" opacity="0.75"/>
+                <path d="M60 60 L95.3 24.7 A50 50 0 0 1 110 60 Z" fill="#a855f7" opacity="0.75"/>
+                <path d="M60 60 L110 60 A50 50 0 0 1 95.3 95.3 Z" fill="#f59e0b" opacity="0.8"/>
+                <path d="M60 60 L95.3 95.3 A50 50 0 0 1 60 110 Z" fill="#06b6d4" opacity="0.65"/>
+                <path d="M60 60 L60 110 A50 50 0 0 1 24.7 95.3 Z" fill="#ec4899" opacity="0.75"/>
+                <path d="M60 60 L24.7 95.3 A50 50 0 0 1 10 60 Z" fill="#8b5cf6" opacity="0.7"/>
+                <path d="M60 60 L10 60 A50 50 0 0 1 24.7 24.7 Z" fill="#eab308" opacity="0.75"/>
+                <path d="M60 60 L24.7 24.7 A50 50 0 0 1 60 10 Z" fill="#14b8a6" opacity="0.75"/>
+                <circle cx="60" cy="60" r="14" fill="#0f172a" stroke="#fbbf24" stroke-width="3"/>
+                <circle cx="60" cy="60" r="5" fill="#22d3ee"/>
+              </svg>
+            </div>
+
+            <div class="mt-3 text-center px-4">
+              <span class="text-[11px] font-mono-num uppercase tracking-widest text-cyan-300 block">Interactive Main Stage</span>
+              <h2 class="font-display font-extrabold text-xl sm:text-2xl text-white mt-0.5 group-hover:text-cyan-300 transition-colors">
+                HYPER LUCKY WHEEL
+              </h2>
+            </div>
+          </div>
+
+          <!-- Card Footer Info & Quick Launch -->
+          <div class="flex items-center justify-between gap-4 pt-2">
+            <div>
+              <span class="text-xs text-slate-400 block">Entry Cost</span>
+              <span class="font-mono-num font-bold text-sm text-cyan-300">From 10 Tokens / Spin</span>
+            </div>
+            <button id="btn-hero-quick-spin" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-extrabold text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all group-hover:translate-x-0.5">
+              <span>Quick Spin Now</span>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== INTERACTIVE PLAYABLE COMPONENT: LUCKY WHEEL ==================== -->
+    <section id="lucky-wheel-section" class="scroll-mt-24">
+      <div class="glass-panel-strong rounded-3xl p-6 sm:p-8 lg:p-10 border border-cyan-500/30 relative overflow-hidden">
+        
+        <!-- Top Section Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-8 border-b border-slate-800/90">
+          <div>
+            <div class="inline-flex items-center gap-2 text-cyan-400 text-xs font-mono-num uppercase tracking-widest mb-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+              Playable Arcade Station #01
+            </div>
+            <h2 class="font-display font-black text-2xl sm:text-3xl lg:text-4xl text-white tracking-wide">
+              CYBER MIDWAY <span class="text-cyan-400 text-glow-cyan">LUCKY WHEEL</span>
+            </h2>
+          </div>
+
+          <!-- Live Session Summary Pills -->
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-800 text-xs flex items-center gap-2">
+              <span class="text-slate-400">Session Spins:</span>
+              <span id="wheel-session-spins" class="font-mono-num font-bold text-cyan-300">0</span>
+            </div>
+            <div class="px-3.5 py-2 rounded-xl bg-slate-900/90 border border-slate-800 text-xs flex items-center gap-2">
+              <span class="text-slate-400">Best Hit:</span>
+              <span id="wheel-best-multiplier" class="font-mono-num font-bold text-amber-300">—</span>
+            </div>
+            <button id="btn-demo-jackpot" class="px-3.5 py-2 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-400/40 text-purple-300 text-xs font-semibold transition-all flex items-center gap-1.5" title="Force the next spin to land on the 50x MEGA JACKPOT to preview the celebratory confetti modal!">
+              <svg class="w-3.5 h-3.5 text-amber-300" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>
+              </svg>
+              <span>Lucky Charm: Guaranteed Jackpot Spin</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Wheel & Control Deck Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 pt-8 items-center">
+          
+          <!-- Left / Center: The Interactive Wheel Cabinet (7 cols) -->
+          <div class="lg:col-span-7 flex flex-col items-center justify-center relative">
+            
+            <!-- Status Banner Above Wheel -->
+            <div id="wheel-status-banner" class="mb-5 px-5 py-2 rounded-full bg-slate-900/90 border border-cyan-500/40 text-xs sm:text-sm font-semibold text-cyan-200 flex items-center gap-2.5 shadow-lg">
+              <span id="wheel-status-dot" class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span id="wheel-status-text">Ready! Select your token wager &amp; press SPIN.</span>
+            </div>
+
+            <!-- Wheel Container with Flapper Pointer -->
+            <div class="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[430px] md:h-[430px] flex items-center justify-center">
+              
+              <!-- Outer Decorative Neon Ring with LED Bulbs -->
+              <div id="wheel-led-ring" class="absolute inset-0 rounded-full border-[10px] border-slate-900 bg-slate-950 wheel-outer-ring flex items-center justify-center">
+              </div>
+
+              <!-- Top Mechanical Flapper Pointer -->
+              <div class="absolute -top-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+                <div id="wheel-flapper" class="wheel-flapper">
+                  <svg width="48" height="58" viewBox="0 0 48 58" fill="none">
+                    <filter id="pointerGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#fbbf24" flood-opacity="0.65"/>
+                    </filter>
+                    <path d="M24 54L8 18C6 13 9.5 6 15.5 6H32.5C38.5 6 42 13 40 18L24 54Z" fill="#fbbf24" stroke="#0f172a" stroke-width="3" filter="url(#pointerGlow)"/>
+                    <circle cx="24" cy="15" r="5" fill="#0f172a"/>
+                    <circle cx="24" cy="15" r="2.5" fill="#22d3ee"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- High-DPI HTML5 Canvas for Wheel Segments -->
+              <canvas id="lucky-wheel-canvas" width="800" height="800" class="w-[276px] h-[276px] sm:w-[372px] sm:h-[372px] md:w-[400px] md:h-[400px] rounded-full relative z-10"></canvas>
+
+              <!-- Center Hub Cap Spin Trigger -->
+              <button id="btn-wheel-center" aria-label="Spin the Lucky Wheel" class="absolute z-20 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-slate-950 border-4 border-amber-400 glow-amber flex flex-col items-center justify-center text-center group hover:scale-105 active:scale-95 transition-transform focus:outline-none">
+                <span class="font-display font-black text-xs sm:text-sm tracking-wider text-amber-300 group-hover:text-cyan-300 transition-colors">SPIN</span>
+                <span id="center-token-cost" class="font-mono-num text-[10px] text-slate-400">25 TKN</span>
+              </button>
+
+            </div>
+          </div>
+
+          <!-- Right: Wheel Control Deck & Multipliers (5 cols) -->
+          <div class="lg:col-span-5 space-y-6">
+            
+            <!-- Wager / Token Cost Selector Card -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+                  1. Select Token Play Tier
+                </span>
+                <span class="text-xs text-cyan-400 font-mono-num">Higher Tier = Bigger Ticket Payout</span>
+              </div>
+
+              <div class="grid grid-cols-4 gap-2.5" id="wager-selector">
+                <button data-wager="10" class="wager-btn py-2.5 px-3 rounded-xl font-mono-num font-bold text-xs border transition-all bg-slate-950/80 border-slate-800 text-slate-300 hover:border-cyan-500/40">
+                  10 <span class="block text-[9px] font-sans font-normal text-slate-400">Tokens</span>
+                </button>
+                <button data-wager="25" class="wager-btn py-2.5 px-3 rounded-xl font-mono-num font-bold text-xs border transition-all bg-cyan-500/20 border-cyan-400 text-cyan-200 glow-cyan">
+                  25 <span class="block text-[9px] font-sans font-normal text-cyan-300">Tokens</span>
+                </button>
+                <button data-wager="50" class="wager-btn py-2.5 px-3 rounded-xl font-mono-num font-bold text-xs border transition-all bg-slate-950/80 border-slate-800 text-slate-300 hover:border-cyan-500/40">
+                  50 <span class="block text-[9px] font-sans font-normal text-slate-400">Tokens</span>
+                </button>
+                <button data-wager="100" class="wager-btn py-2.5 px-3 rounded-xl font-mono-num font-bold text-xs border transition-all bg-slate-950/80 border-slate-800 text-slate-300 hover:border-cyan-500/40">
+                  100 <span class="block text-[9px] font-sans font-normal text-slate-400">Tokens</span>
+                </button>
+              </div>
+
+              <!-- Primary Spin CTA Button -->
+              <button id="btn-spin-main" class="btn-shimmer w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-purple-600 hover:from-amber-300 hover:to-purple-500 text-slate-950 font-display font-black text-base uppercase tracking-wider shadow-xl shadow-amber-500/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                <span id="btn-spin-label">LAUNCH SPIN (25 TOKENS)</span>
+              </button>
+            </div>
+
+            <!-- Wheel Multipliers Legend -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+                  Wheel Prize Multipliers
+                </span>
+                <span class="text-[11px] text-amber-300 font-semibold">✨ 15x+ Triggers Jackpot Party</span>
+              </div>
+              <div id="wheel-legend-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <!-- Recent Spins Feed -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-display font-bold text-xs uppercase tracking-wider text-slate-300">
+                  Recent Wheel Outcomes
+                </span>
+                <span class="text-[11px] text-slate-400 font-mono-num">Live Log</span>
+              </div>
+              <div id="spin-history-list" class="space-y-2 max-h-36 overflow-y-auto pr-1">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== CARNIVAL MINI-GAME CATALOG GRID ==================== -->
+    <section id="game-grid-section" class="scroll-mt-24 space-y-6">
+      
+      <!-- Header & Filter Bar -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 text-purple-400 text-xs font-mono-num uppercase tracking-widest mb-1.5">
+            <span>⚡</span>
+            Midway Attractions
+          </div>
+          <h2 class="font-display font-black text-2xl sm:text-3xl text-white">
+            CARNIVAL <span class="text-purple-400 text-glow-purple">MINI-GAME</span> FLOOR
+          </h2>
+        </div>
+
+        <!-- Category Filter Pills & Search -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          <div class="relative">
+            <input id="game-search-input" type="text" placeholder="Cari game..." class="w-40 sm:w-48 pl-8 pr-3 py-2 rounded-xl bg-slate-900/90 border border-slate-800 focus:border-cyan-400/60 focus:outline-none text-xs text-white placeholder-slate-500" />
+            <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+          </div>
+          <div id="category-filters" class="flex flex-wrap items-center gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800">
+            <button data-cat="all" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition-all">
+              All (42)
+            </button>
+            <button data-cat="popular" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+              🔥 Popular
+            </button>
+            <button data-cat="2p" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+              👥 2 Players
+            </button>
+            <button data-cat="jackpot" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+              👑 Jackpot
+            </button>
+            <button data-cat="skill" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+              🎯 Skill
+            </button>
+            <button data-cat="action" class="cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+              ⚡ Reflex &amp; Action
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Responsive Game Grid -->
+      <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Populated dynamically from in-memory JS catalog -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="border-t border-slate-800/80 mt-16 py-8 glass-panel">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="font-display font-bold text-white">NEON<span class="text-cyan-400">ARCADE</span></span>
+        <span>•</span>
+        <span>100% Virtual Carnival Token &amp; Ticket Amusement Platform</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-cyan-400/90 font-mono-num">Sound: WebAudio Synthesizer</span>
+        <span>•</span>
+        <span>Built with HTML5, Tailwind CSS &amp; Vanilla JS</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== CELEBRATORY JACKPOT / TOP PRIZE MODAL ==================== -->
+  <div id="jackpot-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-panel-strong border-2 border-amber-400/80 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center relative glow-amber animate-float">
+      
+      <!-- Close Button -->
+      <button id="btn-close-jackpot" aria-label="Close Modal" class="absolute top-4 right-4 w-8 h-8 rounded-lg bg-slate-900/90 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center">
+        ✕
+      </button>
+
+      <!-- Trophy / Crown Badge -->
+      <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-amber-400/30 via-purple-500/25 to-cyan-400/30 border-2 border-amber-300 flex items-center justify-center glow-amber">
+        <svg class="w-11 h-11 text-amber-300" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/>
+        </svg>
+      </div>
+
+      <span id="modal-prize-tier" class="inline-block px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/50 text-amber-300 font-display font-bold text-xs uppercase tracking-widest mb-2">
+        MEGA CARNIVAL JACKPOT!
+      </span>
+
+      <h3 id="modal-prize-title" class="font-display font-black text-3xl sm:text-4xl text-white text-glow-amber mb-2">
+        50x MULTIPLIER!
+      </h3>
+
+      <p class="text-slate-300 text-sm mb-6">
+        The Lucky Wheel locked onto a top-tier neon segment! Your prize tickets have been credited to your carnival pass.
+      </p>
+
+      <!-- Ticket Reward Box -->
+      <div class="bg-slate-900/95 border border-amber-400/40 rounded-2xl p-4 mb-6">
+        <span class="text-[11px] uppercase tracking-widest text-slate-400 block mb-1">Tickets Won This Spin</span>
+        <div class="flex items-center justify-center gap-2">
+          <span class="text-amber-300 font-display font-black text-3xl sm:text-4xl font-mono-num" id="modal-tickets-won">+1,250</span>
+          <span class="text-xs font-bold uppercase text-amber-400 bg-amber-400/15 px-2 py-1 rounded-md">Tickets</span>
+        </div>
+      </div>
+
+      <button id="btn-claim-jackpot" class="btn-shimmer w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-cyan-400 text-slate-950 font-display font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/25 hover:scale-[1.02] transition-transform">
+        Collect Tickets &amp; Keep Playing
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== PLAYABLE ARCADE CABINET MODAL ==================== -->
+  <div id="arcade-cabinet-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="glass-panel-strong border border-cyan-500/40 rounded-3xl max-w-2xl w-full p-4 sm:p-6 relative glow-cyan max-h-[95vh] overflow-y-auto">
+      
+      <!-- Cabinet Header -->
+      <div class="flex items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-800/90">
+        <div class="flex items-center gap-3">
+          <div id="cabinet-icon" class="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-400/40 flex items-center justify-center text-xl shrink-0">
+            🎱
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span id="cabinet-badge" class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                Popular
+              </span>
+              <span id="cabinet-difficulty" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                HARD
+              </span>
+              <span id="cabinet-cost-pill" class="font-mono-num text-[11px] text-cyan-300 font-bold">15 Tokens / Round</span>
+            </div>
+            <h3 id="cabinet-title" class="font-display font-black text-lg sm:text-xl text-white">
+              Pinball Bounce
+            </h3>
+          </div>
+        </div>
+
+        <button id="btn-close-cabinet" aria-label="Close Arcade Cabinet" class="w-9 h-9 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center shrink-0">
+          ✕
+        </button>
+      </div>
+
+      <!-- Live Game HUD Bar -->
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl px-3.5 py-2 flex items-center justify-between">
+          <span id="cabinet-hud-score-label" class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Tickets Won</span>
+          <span id="cabinet-hud-score" class="font-mono-num font-black text-base sm:text-lg text-amber-300">0</span>
+        </div>
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl px-3.5 py-2 flex items-center justify-between">
+          <span id="cabinet-hud-info-label" class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Status</span>
+          <span id="cabinet-hud-info" class="font-mono-num font-bold text-sm sm:text-base text-cyan-300">Ready</span>
+        </div>
+      </div>
+
+      <!-- Interactive Playable Stage -->
+      <div class="relative rounded-2xl bg-[#060913] border border-slate-800 overflow-hidden flex items-center justify-center min-h-[320px]">
+        <canvas id="arcade-canvas" class="w-full max-w-[440px] max-h-[56vh] object-contain touch-none select-none cursor-crosshair"></canvas>
+        <div id="arcade-dom-stage" class="hidden w-full py-4"></div>
+
+        <!-- Start / Round Complete Overlay -->
+        <div id="arcade-stage-overlay" class="absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
+          <h4 id="overlay-title" class="font-display font-black text-xl sm:text-2xl text-white text-glow-cyan mb-2">
+            PINBALL BOUNCE
+          </h4>
+          <p id="overlay-subtitle" class="text-slate-300 text-xs sm:text-sm max-w-md mb-4 leading-relaxed">
+            Launch the chrome cyber-orb into neon bumpers!
+          </p>
+
+          <!-- 1P / 2P Mode Selector (Shown for games supporting 2 Players) -->
+          <div id="overlay-mode-selector" class="hidden items-center justify-center gap-2 mb-4 bg-slate-900/95 p-1.5 rounded-xl border border-slate-700/80">
+            <button id="btn-mode-1p" type="button" class="px-3.5 py-2 rounded-lg text-xs font-display font-bold transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-400/50">
+              👤 1 Player (Solo)
+            </button>
+            <button id="btn-mode-2p" type="button" class="px-3.5 py-2 rounded-lg text-xs font-display font-bold transition-all text-slate-400 hover:text-white">
+              👥 2 Players (1v1)
+            </button>
+          </div>
+
+          <div id="overlay-reward-box" class="hidden mb-5 px-5 py-3 rounded-2xl bg-slate-900/95 border border-amber-400/50 glow-amber">
+            <span class="text-[10px] uppercase tracking-widest text-slate-400 block">Round Reward Credited</span>
+            <span id="overlay-reward-val" class="font-mono-num font-black text-xl sm:text-2xl text-amber-300">+250 PRIZE TICKETS</span>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-3 w-full max-w-sm">
+            <button id="btn-cabinet-start" class="btn-shimmer flex-1 py-3.5 px-5 rounded-xl bg-gradient-to-r from-cyan-400 via-amber-400 to-purple-500 text-slate-950 font-display font-black text-xs uppercase tracking-wider shadow-lg">
+              INSERT 15 TOKENS &amp; PLAY
+            </button>
+            <button id="btn-cabinet-back" class="hidden py-3.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-display font-bold text-xs uppercase">
+              Catalog
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Game Controls / Touch Bar -->
+      <div id="arcade-controls-bar" class="mt-3 min-h-[42px] flex items-center justify-center">
+        <!-- Populated dynamically per game -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Banner Notification -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script src="games.js"></script>
+  <script src="games_extra.js"></script>
+  <script src="games_more.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
